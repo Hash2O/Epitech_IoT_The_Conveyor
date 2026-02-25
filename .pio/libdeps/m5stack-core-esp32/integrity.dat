@@ -1,0 +1,10 @@
+arduinoJSON
+WebServer
+ESP32Ping
+SPI
+WiFi
+m5stack/M5Stack
+AccelStepper
+WiFiMulti
+m5stack/Module_GRBL_13.2@^0.0.3
+FastLED
