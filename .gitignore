@@ -1,3 +1,6 @@
 *.o
 dolibarAPIcall
 .vscode
+
+# Configuration file with sensitive data
+include/config.h

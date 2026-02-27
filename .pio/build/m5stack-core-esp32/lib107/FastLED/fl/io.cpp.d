@@ -1,0 +1,5 @@
+.pio/build/m5stack-core-esp32/lib107/FastLED/fl/io.cpp.o: \
+ .pio/libdeps/m5stack-core-esp32/FastLED/src/fl/io.cpp \
+ .pio/libdeps/m5stack-core-esp32/FastLED/src/fl/io.h \
+ .pio/libdeps/m5stack-core-esp32/FastLED/src/fl/stdint.h \
+ .pio/libdeps/m5stack-core-esp32/FastLED/src/platforms/esp/io_esp.h

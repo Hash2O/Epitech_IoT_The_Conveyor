@@ -1,0 +1,48 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// =============================================================================
+// CONFIGURATION DU PROJET - À MODIFIER SELON VOS BESOINS
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// 1. CONFIGURATION WiFi
+// -----------------------------------------------------------------------------
+// IMPORTANT: Remplacez ces valeurs par vos propres informations WiFi
+// Où trouver ces informations:
+//   - WIFI_SSID: Le nom de votre réseau WiFi (visible dans les paramètres WiFi de votre téléphone/ordinateur)
+//   - WIFI_PASSWORD: Le mot de passe de votre réseau WiFi
+
+#define WIFI_SSID "VOTRE_SSID_WIFI"          // Exemple: "MonReseauWiFi" ou "iPhone de Julien"
+#define WIFI_PASSWORD "VOTRE_MOT_DE_PASSE"   // Exemple: "monMotDePasse123"
+
+// -----------------------------------------------------------------------------
+// 2. CONFIGURATION DOLIBARR API
+// -----------------------------------------------------------------------------
+// IMPORTANT: Ces informations proviennent de votre instance Dolibarr
+// Où trouver ces informations:
+//   - BASE_URL: L'URL de votre serveur Dolibarr + /api/index.php
+//     Exemple: Si votre Dolibarr est sur http://192.168.1.100/dolibarr
+//              alors BASE_URL = "http://192.168.1.100/dolibarr/api/index.php"
+//
+//   - API_KEY: Dans Dolibarr, allez dans:
+//     1. Menu Accueil > Configuration > Modules/Applications
+//     2. Activez le module "API/Services Web REST (API REST)"
+//     3. Allez dans Menu Accueil > Utilisateurs & Groupes
+//     4. Sélectionnez votre utilisateur
+//     5. Onglet "Token API" > Générer un nouveau token
+//     6. Copiez la clé générée
+
+#define BASE_URL "http://VOTRE_IP_SERVEUR/api/index.php"  // Exemple: "http://192.168.1.100/dolibarr/api/index.php"
+#define API_KEY "VOTRE_CLE_API_DOLIBARR"                   // Exemple: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+
+// -----------------------------------------------------------------------------
+// NOTES IMPORTANTES:
+// -----------------------------------------------------------------------------
+// - NE JAMAIS commiter ce fichier avec vos vraies informations sur Git
+// - Créez un fichier config.h.example avec des valeurs d'exemple
+// - Ajoutez config.h dans votre .gitignore pour protéger vos données sensibles
+// =============================================================================
+
+#endif
+

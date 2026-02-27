@@ -44,10 +44,12 @@ Product WiFiRequestHandler::getProductById(int id)
             String response = http.getString();
             product = Product::parseFromJson(response);
             product.printProduct();
-        } else
+        } else {
             M5.Lcd.printf("HTTP GET request failed with code: %d\n", httpCode);
-    } else
+        }
+    } else {
         M5.Lcd.printf("GET request failed: %s\n", http.errorToString(httpCode).c_str());
+    }
 
     http.end();
 
@@ -56,6 +58,11 @@ Product WiFiRequestHandler::getProductById(int id)
 
 void WiFiRequestHandler::postStockMovement(Product product)
 {
+    if (product.id == "" || product.warehouse_id == "") {
+        M5.Lcd.println("Cannot post stock movement: invalid product");
+        return;
+    }
+
     String endpoint = "/stockmovements";
     String url = BASE_URL + endpoint;
     String payload = "{\"product_id\": " + product.id + ",\"warehouse_id\": " + product.warehouse_id + ",\"qty\": -1}";
@@ -68,13 +75,14 @@ void WiFiRequestHandler::postStockMovement(Product product)
     int httpCode = http.POST(payload);
 
     if (httpCode > 0) {
-        if (httpCode == HTTP_CODE_OK)
-            M5.Lcd.println("Success");
-        else
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_CREATED) {
+            M5.Lcd.println("Stock movement posted successfully");
+        } else {
             M5.Lcd.printf("POST request failed with code: %d\n", httpCode);
-    } else
+        }
+    } else {
         M5.Lcd.printf("POST request failed: %s\n", http.errorToString(httpCode).c_str());
+    }
 
     http.end();
-    return;
 }

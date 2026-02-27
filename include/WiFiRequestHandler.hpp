@@ -8,12 +8,7 @@
 #include <ArduinoJson.h>
 
 #include "Product.hpp"
-
-#define WIFI_SSID "iPhone de Geoffrey"
-#define WIFI_PASSWORD "Geoffreybg"
-#define API_KEY "8tq9sVP2YEzbFk0k6H99UWoL49UtS1uw"
-
-#define BASE_URL "http://34.163.18.219/api/index.php"
+#include "config.h"  // Configuration WiFi et API (à modifier selon vos besoins)
 
 class WiFiRequestHandler
 {

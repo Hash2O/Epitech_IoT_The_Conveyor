@@ -1,183 +1,184 @@
+#include "Motor.hpp"
+#include "RFIDReader.hpp" // Assure-toi que ce fichier contient bien les déclarations des nouvelles fonctions
+#include "ServoMotor.hpp"
 #include <M5Stack.h>
 #include <Wire.h>
-#include <FastLED.h>
-#include <vector>
-#include "Module_GRBL_13.2.h"
 
-#include "RFIDReader.hpp"
-#include "NodeManager.hpp"
-#include "WiFiRequestHandler.hpp"
-#include "ServoMotor.hpp"
-#include "Motor.hpp"
-#include "Motion.hpp"
-#include "EndSensor.hpp"
-
-// Classes
-Motion motion;
+// Instance du moteur
 Motor motor;
 ServoMotor servoMotor;
-WiFiRequestHandler wifiRequestHandler;
-RFIDReader rfidReader;
-NodeManager nodeManager;
-EndSensor endSensor;
+// ❌ SUPPRIMÉ : RFIDReader rfidReader; (On n'utilise plus de classe)
 
-// LED Control
-#define NUM_LEDS 10
-#define DATA_PIN 15
-CRGB leds[NUM_LEDS];
+// État du moteur
+bool motorRunning = false;
 
-bool shouldMotorBeActive = false;
-bool isProductReferenced = true;
-bool isMotorPaused = motor.isPaused();
+void setup() {
+  M5.begin(true, true, true, true);
+  M5.Power.begin();
+  Wire.begin();
+  M5.Speaker.setVolume(5);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextColor(YELLOW);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.println("=== TEST MOTEUR ===");
+  M5.Lcd.println();
 
-bool isProductInTransit = false;
-Product currentProduct;
+  // Vérification du module GRBL
+  Wire.beginTransmission(0x70);
+  if (Wire.endTransmission() == 0) {
+    M5.Lcd.setTextColor(GREEN);
+    M5.Lcd.println("Module GRBL OK (0x70)");
+  } else {
+    M5.Lcd.setTextColor(RED);
+    M5.Lcd.println("ERREUR: Module non trouve!");
+    M5.Lcd.println("Verifiez le cablage I2C");
+    while (1) {
+      delay(1000);
+    }
+  }
 
-void setup()
-{
-    M5.begin(true, true, true, true);
-    M5.Power.begin();
+  // Initialisation du moteur
+  M5.Lcd.setTextColor(CYAN);
+  M5.Lcd.println("Initialisation moteur...");
+  motor.initialize();
+  delay(500);
 
-    motor.initialize();
+  // Initialisation du lecteur RFID
+  M5.Lcd.setTextColor(CYAN);
+  M5.Lcd.println("Initialisation RFID...");
 
-    rfidReader.init();
-    rfidReader.showDetails();
+  M5.Lcd.setTextColor(CYAN);
+  M5.Lcd.println("Initialisation Servo...");
+  servoMotor.initialize();
+  servoMotor.setAngle(90); // Position centrale par défaut
+  delay(500);
+  // ✅ NOUVELLE FONCTION
+  rfid_init();
+  delay(500);
 
-    wifiRequestHandler.connectWiFi();
+  // ❌ SUPPRIMÉ : rfidReader.showDetails(); (N'existe plus dans le nouveau
+  // code)
 
-    motion.initialize();
-
-    servoMotor.initialize();
-
-    endSensor.initialize();
-
-    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-    fill_solid(leds, NUM_LEDS, CRGB::Black);
-    FastLED.show();
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.println();
+  M5.Lcd.println("Pret!");
+  M5.Lcd.println();
+  M5.Lcd.println("Bouton A: START");
+  M5.Lcd.println("Bouton B: STOP");
+  M5.Lcd.println("Bouton C: INFO");
 }
 
-void clearScreen()
-{
+void loop() {
+  M5.update();
+
+  // ✅ NOUVELLE FONCTION : Détection RFID
+  if (rfid_is_card_detected()) {
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setCursor(0, 0);
+    M5.Lcd.setTextColor(CYAN);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.println("=== CARTE DETECTEE ===");
+    M5.Lcd.println();
+
+    // Type de carte (On met un texte générique car getCardType n'existe plus)
+    M5.Lcd.setTextColor(YELLOW);
+    M5.Lcd.print("Type: ");
+    M5.Lcd.println("Tag NFC/RFID");
+    M5.Lcd.println();
+
+    // Lire les données du produit
+    char message[64] = {0};
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.println("Lecture UID en cours...");
+    M5.Lcd.println();
+
+    // ✅ NOUVELLE FONCTION : Lecture de l'UID
+    // ✅ Lecture de l'UID
+    if (rfid_read_product_code(message, sizeof(message))) {
+      // 1. FAIRE UN BIP (Fréquence 2000 Hz pendant 150 millisecondes)
+      M5.Speaker.tone(2000, 150);
+
+      servoMotor.setAngle(115);
+      // 2. COUPER LE MOTEUR
+      motorRunning = false;
+      motor.handleMotorInstructions(true, false);
+
+      // 3. AFFICHAGE ÉCRAN
+      M5.Lcd.setTextColor(GREEN);
+      M5.Lcd.println("Lecture reussie!");
+      M5.Lcd.println();
+
+      M5.Lcd.setTextColor(RED);
+      M5.Lcd.println("MOTEUR ARRETE");
+      M5.Lcd.println();
+
+      M5.Lcd.setTextColor(WHITE);
+      M5.Lcd.println("UID Produit:");
+      M5.Lcd.println(message);
+
+      Serial.println("=== RFID LECTURE REUSSIE ===");
+      Serial.print("UID: ");
+      Serial.println(message);
+      Serial.println("Action: Moteur mis en pause.");
+    } else {
+      // Bip d'erreur (son plus grave et plus long)
+      M5.Speaker.tone(500, 300);
+
+      M5.Lcd.setTextColor(RED);
+      M5.Lcd.println("Erreur de lecture!");
+      Serial.println("Erreur: Impossible de lire l'UID");
+    }
+    // ✅ NOUVELLE FONCTION : Arrêt de la comm
+    rfid_stop_communication();
+    delay(3000);
+  }
+
+  // Bouton A: Démarrer le moteur
+  if (M5.BtnA.wasPressed()) {
+    motorRunning = true;
+    motor.handleMotorInstructions(true, true);
+    servoMotor.setAngle(115);
+
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setCursor(0, 0);
+    M5.Lcd.setTextColor(GREEN);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.println("MOTEUR");
+    M5.Lcd.println("EN MARCHE");
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.println();
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.println("Commande: G1 X10000 F500");
+  }
+
+  // Bouton B: Arrêter le moteur
+  if (M5.BtnB.wasPressed()) {
+    motorRunning = false;
+    motor.handleMotorInstructions(true, false);
+
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setCursor(0, 0);
+    M5.Lcd.setTextColor(RED);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.println("MOTEUR");
+    M5.Lcd.println("ARRETE");
+  }
+
+  // Bouton C: Afficher info
+  if (M5.BtnC.wasPressed()) {
     M5.Lcd.fillScreen(BLACK);
     M5.Lcd.setCursor(0, 0);
     M5.Lcd.setTextColor(YELLOW);
     M5.Lcd.setTextSize(2);
-}
+    M5.Lcd.println("=== INFORMATIONS ===");
+    M5.Lcd.println();
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.printf("Etat: %s\n", motorRunning ? "EN MARCHE" : "ARRETE");
+    M5.Lcd.println();
+    M5.Lcd.println("Config GRBL:");
+    M5.Lcd.println("  Axe: X");
+    M5.Lcd.println("  Vitesse max: 500");
+  }
 
-void setLEDColor(CRGB color, int numLeds = NUM_LEDS, uint32_t delayMs = 300)
-{
-    fill_solid(leds, numLeds, color);
-    FastLED.show();
-
-    delay(delayMs);
-
-    fill_solid(leds, numLeds, CRGB::Black);
-    FastLED.show();
-}
-
-void checkForServoUpdate()
-{
-    NodeManager::Node_t *node = nodeManager.getFirstNode();
-
-    if (!node)
-        return;
-
-    if (time(NULL) >= node->time) {
-        nodeManager.removeNode();
-        NodeManager::Node_t *newFirstNode = nodeManager.getFirstNode();
-        if (newFirstNode)
-            servoMotor.setAngle(newFirstNode->val);
-        return;
-    }
-
-    servoMotor.setAngle(node->val);
-    M5.Lcd.printf("Setting angle to %d\n", node->val);
-}
-
-void handleProduct(int id)
-{
-    Product product = wifiRequestHandler.getProductById(id);
-    if (product.id == "" || product.warehouse_id == "") {
-        setLEDColor(CRGB::Orange);
-        isProductReferenced = false;
-        shouldMotorBeActive = false;
-        M5.Lcd.println("Product not found or invalid warehouse id");
-        return;
-    }
-    // wifiRequestHandler.postStockMovement(product);
-    
-    currentProduct = product;
-    isProductInTransit = true;
-    shouldMotorBeActive = true;
-
-    int angle = servoMotor.calculateAngle(id);
-
-    nodeManager.pushNode(angle);
-}
-
-bool handleRFIDSensor()
-{
-    if (!rfidReader.isCardDetected()) return false;
-    if (isProductInTransit) return false;
-
-    rfidReader.setDefaultKey();
-
-    char message[BLOCK_SIZE * 3];
-    memset(message, 0, sizeof(message));
-
-    rfidReader.readBlock(message);
-
-    rfidReader.stopCommunication();
-
-    int id = atoi(message);
-    handleProduct(id);
-
-    return true;
-}
-
-void handleMotionSensor()
-{
-    bool isMotionDetected = motion.isMotionDetected();
-
-    if (isMotionDetected)
-        shouldMotorBeActive = true;
-
-    motor.handleMotorInstructions(isProductReferenced, shouldMotorBeActive);
-    handleRFIDSensor();
-    checkForServoUpdate();
-
-    if (nodeManager.isEmpty() && !isMotionDetected && nodeManager.getLastTime() <= time(NULL)) {
-        shouldMotorBeActive = false;
-        setLEDColor(CRGB::Red);
-        M5.Lcd.println("No more products to handle.");
-    }
-}
-
-void loop()
-{
-    clearScreen();
-    nodeManager.printNodes();
-    handleMotionSensor();
-    HandleEndProcess();
-    delay(500);
-}
-
-void HandleEndProcess()
-{
-    if (isProductInTransit && endSensor.isEndSensorDetected()) {
-        
-        // On arrête le moteur physiquement
-        shouldMotorBeActive = false;
-        motor.handleMotorInstructions(isProductReferenced, shouldMotorBeActive);
-
-        // On envoie le mvt de stock à Dolibarr
-        wifiRequestHandler.postStockMovement(currentProduct);
-        M5.Lcd.println("Stock updated in Dolibarr");
-
-        // Re init de l'état de la machine
-        isProductInTransit = false;
-
-        // Option : vider le currentProduct
-        currentProduct = Product();
-    }
+  delay(100);
 }

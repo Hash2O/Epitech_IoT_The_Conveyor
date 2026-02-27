@@ -1,67 +1,36 @@
 #include "RFIDReader.hpp"
-#include <M5Stack.h>
+#include "MFRC522_I2C.h"
+#include <Arduino.h>
+#include <Wire.h>
 
-RFIDReader::RFIDReader() : rfid(0x28) {}
+#define RFID_I2C_ADDR 0x28
 
-RFIDReader::RFIDReader(uint8_t i2cAddress) : rfid(i2cAddress) {}
+static MFRC522 rfid(RFID_I2C_ADDR);
 
-void RFIDReader::init()
-{
-    rfid.PCD_Init();
+void rfid_init(void) { rfid.PCD_Init(); }
+
+bool rfid_is_card_detected(void) {
+  if (!rfid.PICC_IsNewCardPresent())
+    return false;
+
+  delay(50);
+  return rfid.PICC_ReadCardSerial();
 }
 
-void RFIDReader::setDefaultKey()
-{
-    for (byte i = 0; i < sizeof(key.keyByte); i++)
-        key.keyByte[i] = 0xFF;
+bool rfid_read_product_code(char *code_buffer, uint8_t buffer_size) {
+  if (code_buffer == NULL || buffer_size < 33)
+    return false;
+
+  memset(code_buffer, 0, buffer_size);
+
+  sprintf(code_buffer, "%02X%02X%02X%02X%02X%02X%02X", rfid.uid.uidByte[0],
+          rfid.uid.uidByte[1], rfid.uid.uidByte[2], rfid.uid.uidByte[3],
+          rfid.uid.uidByte[4], rfid.uid.uidByte[5], rfid.uid.uidByte[6]);
+
+  return true;
 }
 
-void RFIDReader::showDetails()
-{
-    byte version = rfid.PCD_ReadRegister(rfid.VersionReg);
-
-    M5.Lcd.printf("MFRC522 Software Version: 0x%02X\n", version);
-    if (version == MFRC522_VERSION_1_0)
-        M5.Lcd.println(" = v1.0");
-    else if (version == MFRC522_VERSION_2_0)
-        M5.Lcd.println(" = v2.0");
-    else
-        M5.Lcd.println(" (unknown)");
-
-    if ((version == COMM_FAILURE_CODE_1) || (version == COMM_FAILURE_CODE_2))
-        M5.Lcd.println("WARNING: Communication failure, is the MFRC522 properly connected?");
-}
-
-bool RFIDReader::readBlock(char *message)
-{
-    for (byte blockAddr = FIRST_BLOCK; blockAddr <= NEXT_BLOCK; blockAddr++) {
-        byte status = rfid.PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, blockAddr, &key, &(rfid.uid));
-
-        if (status != MFRC522::STATUS_OK) {
-            M5.Lcd.println("Authenticate Failed");
-            return false;
-        }
-
-        byte buffer[MIFARE_SANITY_SIZE];
-        byte size = sizeof(buffer);
-        status = rfid.MIFARE_Read(blockAddr, buffer, &size);
-        if (status != MFRC522::STATUS_OK) {
-            M5.Lcd.println("Failed to data from block");
-            return false;
-        }
-
-        strncat(message, (char *)buffer, BLOCK_SIZE);
-    }
-    return true;
-}
-
-void RFIDReader::stopCommunication()
-{
-    rfid.PICC_HaltA();
-    rfid.PCD_StopCrypto1();
-}
-
-bool RFIDReader::isCardDetected()
-{
-    return rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial();
+void rfid_stop_communication(void) {
+  rfid.PICC_HaltA();
+  rfid.PCD_StopCrypto1();
 }
