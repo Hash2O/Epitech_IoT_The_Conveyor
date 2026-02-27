@@ -1,24 +1,24 @@
-# version: '3.9'
-
 services:
-  # Dolibarr
+  # Dolibarr ERP/WMS
   dolibarr:
-    image: tuxgasy/dolibarr:14.0.2
+    image: tuxgasy/dolibarr:14
     container_name: dolibarr
     ports:
-      - "80:80"
+      - "8080:80"   # 80 → 8080 pour éviter le conflit
     environment:
       - DOLI_DB_HOST=dolibarr-mariadb
       - DOLI_DB_USER=epitech
       - DOLI_DB_PASSWORD=epitech13
       - DOLI_DB_NAME=dolibarr
-    links:
+      - DOLI_URL_ROOT=http://localhost:8080
+      - PHP_INI_DATE_TIMEZONE=Europe/Paris
+    depends_on:
       - dolibarr-mariadb
-#password admin admin
-# API KEY : K7w4wK9u9Kc6EjXTcnv857sFMS0jnPW9
+    restart: unless-stopped
+
   # MariaDB
   dolibarr-mariadb:
-    image: mariadb:10.8
+    image: mariadb:latest
     container_name: dolibarr-mariadb
     ports:
       - "3306:3306"
@@ -30,6 +30,7 @@ services:
       - MYSQL_DATABASE=dolibarr
       - MYSQL_USER=epitech
       - MYSQL_PASSWORD=epitech13
+    restart: unless-stopped
 
   # PHPMyAdmin
   dolibarr-phpmyadmin:
@@ -43,6 +44,9 @@ services:
       - PMA_PORT=3306
       - PMA_USER=epitech
       - PMA_PASSWORD=epitech13
+    depends_on:
+      - dolibarr-mariadb
+    restart: unless-stopped
 
 volumes:
   data:

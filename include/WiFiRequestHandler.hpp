@@ -1,29 +1,28 @@
 #ifndef WIFI_REQUEST_HANDLER_HPP
 #define WIFI_REQUEST_HANDLER_HPP
 
-#include <WiFi.h>
-#include <M5Stack.h>
-#include <WiFiMulti.h>
-#include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <HTTPClient.h>
+#include <M5Stack.h>
+#include <WiFi.h>
+#include <WiFiMulti.h>
 
 #include "Product.hpp"
-#include "config.h"  // Configuration WiFi et API (à modifier selon vos besoins)
+#include "config.h" // Configuration WiFi et API (à modifier selon vos besoins)
 
-class WiFiRequestHandler
-{
+class WiFiRequestHandler {
 public:
-    WiFiRequestHandler();
-    ~WiFiRequestHandler();
+  WiFiRequestHandler();
+  ~WiFiRequestHandler();
 
-    bool connectWiFi();
-    String getLocalIP();
+  bool connectWiFi();
+  String getLocalIP();
 
-    Product getProductById(int id);
-    void postStockMovement(Product product);
+  Product getProductByUid(String uid);
+  void postStockMovement(Product product);
 
 private:
-    WiFiMulti wiFiMulti;
+  WiFiMulti wiFiMulti;
 };
 
 #endif
