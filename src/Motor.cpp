@@ -36,7 +36,7 @@ void Motor::handleMotorInstructions(bool isProductReferenced,
       delay(50);
 
       // 2. Envoyer le mouvement de l'axe Y
-      grbl.sendGcode((char *)"G1 Y10000 F100");
+      grbl.sendGcode((char *)"G1 Y10000 F300");
 
       isMotorPaused = false;
       M5.Lcd.println("Moteur: MARCHE FORCEE");
