@@ -19,7 +19,6 @@ public:
   String getLocalIP();
 
   Product getProductByUid(String uid);
-  void postStockMovement(Product product);
 
 private:
   WiFiMulti wiFiMulti;

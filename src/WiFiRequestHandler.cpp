@@ -71,36 +71,3 @@ Product WiFiRequestHandler::getProductByUid(String uid) {
   }
 
   return product;
-}
-void WiFiRequestHandler::postStockMovement(Product product) {
-  if (product.id == "" || product.warehouse_id == "") {
-    M5.Lcd.println("Cannot post stock movement: invalid product");
-    return;
-  }
-
-  String endpoint = "/stockmovements";
-  String url = BASE_URL + endpoint;
-  String payload = "{\"product_id\": " + product.id +
-                   ",\"warehouse_id\": " + product.warehouse_id +
-                   ",\"qty\": -1}";
-
-  HTTPClient http;
-  http.begin(url);
-  http.addHeader("Content-Type", "application/json");
-  http.addHeader("DOLAPIKEY", API_KEY);
-
-  int httpCode = http.POST(payload);
-
-  if (httpCode > 0) {
-    if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_CREATED) {
-      M5.Lcd.println("Stock movement posted successfully");
-    } else {
-      M5.Lcd.printf("POST request failed with code: %d\n", httpCode);
-    }
-  } else {
-    M5.Lcd.printf("POST request failed: %s\n",
-                  http.errorToString(httpCode).c_str());
-  }
-
-  http.end();
-}
