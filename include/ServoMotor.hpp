@@ -1,7 +1,6 @@
 #ifndef SERVOMOTOR_HPP
 #define SERVOMOTOR_HPP
 
-#include "NodeManager.hpp"
 #include <M5Stack.h>
 
 #define PWM_CHANNEL 0

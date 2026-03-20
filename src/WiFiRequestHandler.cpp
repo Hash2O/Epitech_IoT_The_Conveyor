@@ -71,3 +71,4 @@ Product WiFiRequestHandler::getProductByUid(String uid) {
   }
 
   return product;
+}

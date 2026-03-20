@@ -230,7 +230,7 @@
  .pio/libdeps/m5stack-core-esp32/M5Stack/src/utility/MahonyAHRS.h \
  .pio/libdeps/m5stack-core-esp32/M5Stack/src/utility/SH200Q.h \
  .pio/libdeps/m5stack-core-esp32/Module_GRBL_13.2/src/Module_GRBL_13.2.h \
- include/RFIDReader.hpp include/ServoMotor.hpp include/NodeManager.hpp \
+ include/RFIDReader.hpp include/ServoMotor.hpp \
  include/WiFiRequestHandler.hpp \
  .pio/libdeps/m5stack-core-esp32/ArduinoJson/src/ArduinoJson.h \
  .pio/libdeps/m5stack-core-esp32/ArduinoJson/src/ArduinoJson.hpp \

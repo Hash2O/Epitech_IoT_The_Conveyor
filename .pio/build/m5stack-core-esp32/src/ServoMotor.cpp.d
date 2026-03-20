@@ -1,5 +1,5 @@
 .pio/build/m5stack-core-esp32/src/ServoMotor.cpp.o: src/ServoMotor.cpp \
- include/ServoMotor.hpp include/NodeManager.hpp \
+ include/ServoMotor.hpp \
  .pio/libdeps/m5stack-core-esp32/M5Stack/src/M5Stack.h \
  /Users/kev/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h \
  /Users/kev/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp_arduino_version.h \

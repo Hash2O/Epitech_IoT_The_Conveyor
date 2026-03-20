@@ -6,9 +6,9 @@
 #define SERVO_PORT 0
 
 // On garde les angles précis du nouveau code pour éviter que le bras force
-#define ANGLE_LEFT 93
-#define ANGLE_CENTER 115
-#define ANGLE_RIGHT 136
+#define ANGLE_LEFT 75
+#define ANGLE_CENTER 91
+#define ANGLE_RIGHT 115
 #define SERVO_SPEED_DELAY 15
 
 ServoMotor::ServoMotor() { currentAngle = ANGLE_CENTER; }
