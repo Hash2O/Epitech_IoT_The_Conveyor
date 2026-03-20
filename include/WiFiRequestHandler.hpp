@@ -8,7 +8,7 @@
 #include <WiFiMulti.h>
 
 #include "Product.hpp"
-#include "config.h" // Configuration WiFi et API (à modifier selon vos besoins)
+#include "config.h"
 
 class WiFiRequestHandler {
 public:

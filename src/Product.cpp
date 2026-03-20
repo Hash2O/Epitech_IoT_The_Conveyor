@@ -9,7 +9,6 @@ Product::Product(String id, String ref, String label, String warehouse_id,
       entity(entity) {}
 
 Product Product::parseFromJson(const String &jsonResponse) {
-  // On augmente un peu la capacité pour être large avec les Strings
   DynamicJsonDocument doc(2048);
 
   DeserializationError error = deserializeJson(doc, jsonResponse);
@@ -19,10 +18,8 @@ Product Product::parseFromJson(const String &jsonResponse) {
     return Product();
   }
 
-  // PIÈGE : L'API renvoie un tableau [ {...} ]
-  // On vérifie si c'est bien un tableau et s'il n'est pas vide
   if (doc.is<JsonArray>() && doc.size() > 0) {
-    JsonObject firstProduct = doc[0]; // On prend le premier élément
+    JsonObject firstProduct = doc[0];
 
     return Product(firstProduct["id"].as<String>(),
                    firstProduct["ref"].as<String>(),
@@ -32,7 +29,6 @@ Product Product::parseFromJson(const String &jsonResponse) {
                    firstProduct["entity"].as<String>());
   }
 
-  // Si ce n'est pas un tableau, on tente le parsing direct (au cas où)
   return Product(doc["id"].as<String>(), doc["ref"].as<String>(),
                  doc["label"].as<String>(),
                  doc["fk_default_warehouse"].as<String>(),

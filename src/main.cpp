@@ -123,7 +123,7 @@ void loop() {
       Product scannedProduct = wifiHandler.getProductByUid(String(message));
 
       if (scannedProduct.id != "") {
-        // Récupération de l'ID entrepôt (défaut: 1)
+        // Récupération de l'ID entrepôt
         int warehouseId = (scannedProduct.warehouse_id != "")
                               ? scannedProduct.warehouse_id.toInt()
                               : 1;
@@ -175,7 +175,7 @@ void loop() {
   if (M5.BtnA.wasPressed()) {
     motorRunning = true;
     motor.handleMotorInstructions(true, true);
-    servoMotor.setAngle(115);
+    servoMotor.setAngle(90);
 
     M5.Lcd.fillScreen(BLACK);
     M5.Lcd.setCursor(0, 0);
